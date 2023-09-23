@@ -8,7 +8,7 @@ use std::process;
 #[derive(Debug, Clone)]
 pub enum Chet6Message {
     TextUpdated(String),
-    Connect,
+    Connect(Text),
     SendMessage,
 }
 
@@ -42,7 +42,9 @@ impl Sandbox for Chet6 {
                 println!("Attempting connection...");
                 match Self::connect(&self.address) {
                     Ok(_) => (),
-                    Err(e) => {}
+                    Err(e) => {
+                        
+                    }
                 }
             }
             Chet6Message::SendMessage => {}
@@ -54,13 +56,14 @@ impl Sandbox for Chet6 {
             .on_input(Chet6Message::TextUpdated)
             .padding(10);
 
+        
+
+        let msg_log = Text::new("messages go here").height(Length::FillPortion(19));
+
         let conn_button = Button::new("Connect")
-            .on_press(Chet6Message::Connect)
+            .on_press(Chet6Message::Connect(msg_log))
             .width(Length::Fill)
             .height(Length::FillPortion(1));
-
-        let msg_log = Text::new("1\n2\n3\n4\n5\n6\n7\n8\n9").height(Length::FillPortion(19));
-
         let msg_box: TextInput<'_, Chet6Message> =
             TextInput::new("Send a message", self.message.as_str())
                 .on_submit(Chet6Message::SendMessage)
@@ -80,12 +83,9 @@ impl Sandbox for Chet6 {
 }
 
 impl Chet6 {
-    fn connect(address: &String) -> Result<(), ()> {
-        let stream = match TcpStream::connect(address) {
-            Ok(_) => (),
-            Err(e) => {}
-        };
-
+    fn connect(address: &String) -> Result<(), std::io::Error> {
+        let stream = TcpStream::connect(address)?;
+        
         Ok(())
     }
 }
